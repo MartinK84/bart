@@ -56,6 +56,7 @@ int main_nlinv(int argc, char* argv[])
 	bool out_sens = false;
 	bool scale_im = false;
 	bool usegpu = false;
+	bool oversampled_grid = false;
 	float scaling = -1.;
 
 	const struct opt_s opts[] = {
@@ -80,6 +81,7 @@ int main_nlinv(int argc, char* argv[])
 		OPT_SET('P', &conf.pattern_for_each_coil, "(supplied psf is different for each coil)"),
 		OPT_SET('n', &conf.noncart, "(non-Cartesian)"),
 		OPT_FLOAT('w', &scaling, "val", "inverse scaling of the data"),
+		OPT_SET('1', &oversampled_grid, "use/return oversampled grid"),
 	};
 
 	cmdline(&argc, argv, 2, 3, usage_str, help_str, ARRAY_SIZE(opts), opts);
@@ -152,7 +154,7 @@ int main_nlinv(int argc, char* argv[])
 	long img_output_dims[DIMS];
 	md_copy_dims(DIMS, img_output_dims, img_dims);
 
-	if (conf.noncart) {
+	if (conf.noncart && !oversampled_grid) {
 
 		for (int i = 0; i < 3; i++)
 			if (1 != img_output_dims[i])
@@ -236,7 +238,7 @@ int main_nlinv(int argc, char* argv[])
 	struct linop_s* nufft_op;
 
 
-	if ((-1 == restrict_fov) && conf.noncart)
+	if ((-1 == restrict_fov) && conf.noncart && !oversampled_grid)
 		restrict_fov = 0.5;
 
 
